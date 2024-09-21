@@ -1,5 +1,6 @@
 import React from "react";
 import placeholderImage from '../assets/images/images.png';
+import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
     const image_url = product.image_url || placeholderImage
@@ -16,6 +17,12 @@ const ProductCard = ({ product }) => {
             )}
 
             <p className="font-bold">Nutrition Grade: {product.nutrition_grade || 'N/A'}</p>
+            <Link to={`/product/${product.code}`}> 
+            <button className="bg-cyan-600 text-white rounded px-4 py-2 hover:bg-cyan-700 transition duration-300">
+                View Details
+            </button>
+
+            </Link>
         </div>
     );
 }
