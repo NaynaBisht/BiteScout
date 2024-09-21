@@ -27,6 +27,9 @@ const ProductList = () =>{
             }
             const data = await response.json()
             console.log('Fetched products:', data.products)
+=======
+            console.log('Fetched products:', data.product)
+>>>>>>> Stashed changes
 
             setProducts(data.products || [])
             console.log( 'Data : ' ,data);
