@@ -2,20 +2,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import ProductCard from './ProductCard'
 
 
-const ProductList = ({category}) =>{
+const ProductList = ({searchQuery}) =>{
     const [products, setProducts] = useState([])
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(false)
-
     const[error, setError] = useState(null)
+    const [hasMoreProducts, setHasMoreProducts] = useState(true);
 
     const fetchProducts = useCallback(async() =>{
         setLoading(true)
 
         setError(null)
         try{
-            // const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=%7Bname%7D&json=true`);
-            const response = await fetch()
+            const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=%7Bname%7D&json=true`);
+            // const response = await fetch()
 
             console.log('Response:', response);
 
@@ -27,24 +27,31 @@ const ProductList = ({category}) =>{
             console.log( 'Data : ' ,data);
 
             if (data.products && data.products.length > 0) {
-            setProducts((prev) => [...prev, ...data.products]); // Add fetched products to the state
+                setProducts((prev) => [...prev, ...data.products]);
+                if (data.products.length < 20) { // Assuming each page returns 20 items
+                    setHasMoreProducts(false);
+                }
             } else {
-            setError('No products found.');
+                setHasMoreProducts(false);
             }
         } catch (err){
             setError(err.message)
+        }finally {
+            setLoading(false)
         }
-        setLoading(false)
-    }, [category])
+    }, [page, searchQuery])
 
     useEffect(() => {
         fetchProducts();
-      }, [fetchProducts]);
+    }, [fetchProducts]);
 
     useEffect(() => {
-        fetchProducts();
-      }, [page, fetchProducts]);
+        if (searchQuery) {
+            fetchProducts();
+        }
+    }, [fetchProducts, searchQuery]);
 
+    
     useEffect(() =>{
         const handleScroll = () =>{
             if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !loading ){
@@ -62,25 +69,25 @@ const ProductList = ({category}) =>{
         setPage((prev)=> prev + 1)
     }
 
-    return(
+    return (
         <div>
-            {error && <p className="text-red-500" > Error: {error} </p>}
+            {error && <p className="text-red-500">Error: {error}</p>}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.length === 0 && !loading && !error && (
-                    <p className=" text-center " > No products found </p>
-                ) }
+                    <p className="text-center">No products found</p>
+                )}
 
-                { products.map((product)=>(
-                    <ProductCard key={product.code} product={product}/>
+                {products.map((product) => (
+                    <ProductCard key={product.code} product={product} />
                 ))}
             </div>
 
-            {loading && <p className=" text-center " >Loading...</p> }
+            {loading && <p className="text-center">Loading...</p>}
 
-            {!loading && !error &&(
-                <button onClick={loadMore} className="mt-4 p-2 bg-blue-500 text-white rounded" >
-                {loading ? 'Loading...':'Load more'}
-            </button>
+            {!loading && !error && (
+                <button onClick={loadMore} className="mt-4 p-2 bg-blue-500 text-white rounded">
+                    {loading ? 'Loading...' : 'Load more'}
+                </button>
             )}
         </div>
     )
