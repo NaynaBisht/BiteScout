@@ -18,12 +18,6 @@ function App() {
     <div className="container mx-auto p-2">
       <Header />
       <InfoSection />
-      <SearchBar
-          searchQuery = {searchQuery}
-          onSearchChange = {setSearchQuery} 
-          onSearch={handleSearch}  
-      />
-
       <h1 className="text-3xl font-bold text-center mb-4 ">Food Products</h1>
       
       <ProductList category="someCategory" searchQuery={searchQuery} />

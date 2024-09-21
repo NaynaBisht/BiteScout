@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ProductCard from './ProductCard'
+import SearchBar from "./SearchBar";
 
 
-const ProductList = ({searchQuery}) =>{
+const ProductList = () =>{
     const [products, setProducts] = useState([])
+    const [searchQuery, setSearchQuery] = useState('')
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(false)
     const[error, setError] = useState(null)
@@ -14,23 +16,24 @@ const ProductList = ({searchQuery}) =>{
 
         setError(null)
         try{
+            console.log(`Fetching products for: ${searchQuery}`)
             const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=%7Bname%7D&json=true`);
             // const response = await fetch()
 
-            console.log('Response:', response);
+            console.log('Response:', response); 
 
             if(!response.ok){
                 throw new Error('Failed to fetch products')
             }
             const data = await response.json()
+            console.log('Fetched products:', data.products)
+
             setProducts(data.products || [])
             console.log( 'Data : ' ,data);
 
             if (data.products && data.products.length > 0) {
-                setProducts((prev) => [...prev, ...data.products]);
-                if (data.products.length < 20) { // Assuming each page returns 20 items
-                    setHasMoreProducts(false);
-                }
+                setProducts(data.products)
+                setHasMoreProducts(data.products.length === 20)
             } else {
                 setHasMoreProducts(false);
             }
@@ -39,7 +42,7 @@ const ProductList = ({searchQuery}) =>{
         }finally {
             setLoading(false)
         }
-    }, [page, searchQuery])
+    }, [searchQuery])
 
     useEffect(() => {
         fetchProducts();
@@ -70,8 +73,13 @@ const ProductList = ({searchQuery}) =>{
     }
 
     return (
+
         <div>
+            
+            <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} onSearch={fetchProducts}/>
+
             {error && <p className="text-red-500">Error: {error}</p>}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.length === 0 && !loading && !error && (
                     <p className="text-center">No products found</p>
