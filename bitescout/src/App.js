@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import ProductList from './components/ProductList';
-import Header from './components/Header'
-import InfoSection from './components/InfoSection';
-import SearchBar from './components/SearchBar';
+import ProductList from './components/ProductList.js';
+import Header from './components/Header.js'
+import InfoSection from './components/InfoSection.js';
 import './index.css'
 
 
