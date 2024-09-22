@@ -10,7 +10,7 @@ const ProductCard = ({ product }) => {
             
             <h2 className="text-lg font-semibold mt-2">{product.product_name || 'Unnamed Product '}</h2>
 
-            <p className="text-gray-600">Category: {product.category || 'Unknown Category'}</p>
+            <p> <strong>Category:</strong> {product.categories || 'Unknown Category'}</p>
 
             {product.ingredients_text && (
                 <p><strong>Ingredients: </strong>{product.ingredients_text || 'N/A'}</p>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ProductCard from './ProductCard'
 import SearchBar from "./SearchBar";
+import axios from 'axios';
 
-
-const ProductList = () =>{
+const ProductList = ({selectedCategory}) =>{
     const [products, setProducts] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
     const [page, setPage] = useState(1)
@@ -12,9 +12,11 @@ const ProductList = () =>{
     const [hasMoreProducts, setHasMoreProducts] = useState(true);
 
     const fetchProducts = useCallback(async() =>{
-        setLoading(true)
 
+        setLoading(true)
         setError(null)
+
+
         try{
             console.log(`Fetching products for: ${searchQuery}`)
             const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=%7Bname%7D&json=true`);
@@ -54,6 +56,21 @@ const ProductList = () =>{
         }
     }, [fetchProducts, searchQuery]);
 
+    useEffect(() => {
+        if (selectedCategory) {
+          setLoading(true);
+          // Fetch products by category
+          axios.get(`https://world.openfoodfacts.org/category/${selectedCategory}.json`)
+            .then(response => {
+              setProducts(response.data.products);
+              setLoading(false);
+            })
+            .catch(error => {
+              console.error('Error fetching products:', error);
+              setLoading(false);
+            });
+        }
+      }, [selectedCategory]);
     
     useEffect(() =>{
         const handleScroll = () =>{
@@ -73,10 +90,8 @@ const ProductList = () =>{
     }
 
     return (
-
         <div>
-            
-            <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} onSearch={fetchProducts}/>
+        
 
             {error && <p className="text-red-500">Error: {error}</p>}
 
@@ -89,6 +104,21 @@ const ProductList = () =>{
                     <ProductCard key={product.code} product={product} />
                 ))}
             </div>
+
+            {products.length > 0 ? (
+                <ul>
+                {products.map(product => (
+                    <li key={product.id}>
+                    <h4>{product.product_name}</h4>
+                    <img src={product.image_url} alt={product.product_name} style={{ width: '100px' }} />
+                    <p>Brand: {product.brands}</p>
+                    <p>Category: {selectedCategory}</p>
+                    </li>
+                ))}
+                </ul>
+            ) : (
+                <p>No products found for this category.</p>
+            )}
 
             {loading && <p className="text-center">Loading...</p>}
 
