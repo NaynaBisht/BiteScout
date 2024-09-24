@@ -11,6 +11,10 @@ const ProductList = ({ category, searchQuery }) =>{
     const[error, setError] = useState(null)
     const [hasMoreProducts, setHasMoreProducts] = useState(true)
 
+    // New state for sorting
+    const [sortBy, setSortBy] = useState('name'); // 'name' or 'nutrition'
+    const [sortOrder, setSortOrder] = useState('asc');
+
     
     const fetchProducts = useCallback(async() =>{
 
@@ -103,9 +107,69 @@ const ProductList = ({ category, searchQuery }) =>{
         setSelectedCategory(category);
     };
 
+    // Function to sort products based on criteria and order
+    const sortProducts = (products) => {
+        const sortedProducts = [...products];
+        if (sortBy === 'name') {
+            sortedProducts.sort((a, b) => {
+                const nameA = a.product_name.toLowerCase();
+                const nameB = b.product_name.toLowerCase();
+                return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+            });
+        } else if (sortBy === 'nutrition') {
+            sortedProducts.sort((a, b) => {
+                const gradeA = a.nutrition_grade_fr;
+                const gradeB = b.nutrition_grade_fr;
+                return sortOrder === 'asc' ? gradeA.localeCompare(gradeB) : gradeB.localeCompare(gradeA);
+            });
+        }
+        return sortedProducts;
+    };
+    // Update products when sorting changes
+    useEffect(() => {
+        const sortedProducts = sortProducts(products);
+        setProducts(sortedProducts);
+    }, [sortBy, sortOrder]);
+    // Handle sort criteria change
+    const handleSortChange = (event) => {
+        const { name, value } = event.target;
+        if (name === 'sortBy') {
+            setSortBy(value);
+        } else if (name === 'sortOrder') {
+            setSortOrder(value);
+        }
+    };
+
+    // Sorted products
+    const sortedProducts = sortProducts([...products]);
+
     return (
         <div>
-            <CategoryFilter onCategorySelect={handleCategorySelect} /> 
+            
+
+            {/* Sorting Options */}
+            <div className="flex flex-col sm:flex-row mb-4 justify-between items-center bg-cyan-100 border shadow-xl rounded-lg p-2">
+                <CategoryFilter onCategorySelect={handleCategorySelect} />
+
+                <div className="flex gap-4 items-center rounded border bg-orange-200 p-2 w-full sm:w-auto">
+                    <h1 className="font-bold text-xl">Sort:</h1>
+                    <div className="flex items-center">
+                        <select name="sortOrder" onChange={handleSortChange} value={sortOrder}>
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                    </div>
+                    <div className="flex items-center">
+                        <select name="sortBy" onChange={handleSortChange} value={sortBy}>
+                            <option value="name">Name</option>
+                            <option value="nutrition">Nutrition Grade</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+
             {error && <p className="text-red-500">Error: {error}</p>}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.length === 0 && !loading && !error && (
@@ -113,6 +177,16 @@ const ProductList = ({ category, searchQuery }) =>{
                 )}
 
                 {products.map((product) => (
+                    <ProductCard key={product.code} product={product} />
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sortedProducts.length === 0 && !loading && !error && (
+                    <p className="text-center">No products found</p>
+                )}
+
+                {sortedProducts.map((product) => (
                     <ProductCard key={product.code} product={product} />
                 ))}
             </div>
