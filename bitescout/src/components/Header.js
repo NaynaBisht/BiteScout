@@ -2,7 +2,7 @@ import logo from '../assets/images/biteScout-removebg-preview.png';
 
 const Header = () => {
     return (
-        <nav className="bg-orange-300 p-4 flex flex-col md:flex-row items-center justify-between rounded">
+        <nav className="bg-orange-300 p-4 flex flex-col md:flex-row items-center justify-between rounded-lg">
             <div className="flex items-center mb-4 md:mb-0">
                 <img src={logo} alt="BiteScout Logo" className="w-14 h-14" />
                 <h1 className="font-bold text-3xl text-center md:text-left mt-2 md:mt-0 ml-3">BiteScout</h1>

@@ -16,7 +16,7 @@ function App() {
       <div className="container mx-auto p-2">
         <Header />
         <InfoSection />
-        <h1 className="text-3xl font-bold text-center mb-4">Food Products</h1>
+        <h1 className="text-3xl font-extrabold text-center lg:mb-4 sm:mb-2 ">Food Products</h1>
 
         <SearchBar 
           searchQuery={searchQuery} 

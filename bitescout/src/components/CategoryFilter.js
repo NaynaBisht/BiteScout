@@ -29,26 +29,27 @@ const CategoryFilter = ({ onCategorySelect }) => {
 
   
   return (
-    <div className="mx-auto bg-gray-100 w-[45%] p-2 pl-4 rounded border mb-4" >
-      <label htmlFor="category" className="mr-2 text-lg text-gray-700 font-bold " >Filter by Category :</label>
-      {loading ? (
+    <div className="bg-orange-200 w-full sm:w-[45%] lg:w-[50%] p-2 rounded border ml-3">
+    <label htmlFor="category" className="mr-2 text-lg text-gray-700 font-bold">Filter by Category:</label>
+    {loading ? (
         <p>Loading categories...</p>
-      ) : error ? (
+    ) : error ? (
         <p className="text-red-500">{error}</p>
-      ) : (
+    ) : (
         <select
-          id="category"
-          onChange={(e) => onCategorySelect(e.target.value)}
+            id="category"
+            onChange={(e) => onCategorySelect(e.target.value)}
         >
-          <option value="" >Select a Category</option>
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
+            <option value="">Select a Category</option>
+            {categories.map((category) => (
+                <option key={category} value={category}>
+                    {category}
+                </option>
+            ))}
         </select>
-      )}
-    </div>
+    )}
+</div>
+
   );
 };
 
