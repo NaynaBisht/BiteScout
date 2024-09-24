@@ -1,41 +1,56 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ProductCard from './ProductCard'
-import SearchBar from "./SearchBar";
+import CategoryFilter from "./CategoryFilter";
 import axios from 'axios';
 
-const ProductList = ({selectedCategory}) =>{
+const ProductList = ({ category, searchQuery }) =>{
     const [products, setProducts] = useState([])
-    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedCategory, setSelectedCategory] = useState('')
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(false)
     const[error, setError] = useState(null)
-    const [hasMoreProducts, setHasMoreProducts] = useState(true);
+    const [hasMoreProducts, setHasMoreProducts] = useState(true)
 
+    
     const fetchProducts = useCallback(async() =>{
 
         setLoading(true)
         setError(null)
 
-
         try{
-            console.log(`Fetching products for: ${searchQuery}`)
-            const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=%7Bname%7D&json=true`);
+            const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms={name}&json=true `);
             // const response = await fetch()
+            // let apiUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&json=true`;
+            // if (category) {
+            //     apiUrl += `&category=${category}`;
+            // }
 
-            console.log('Response:', response); 
+            // const response = await fetch(apiUrl);
+
 
             if(!response.ok){
                 throw new Error('Failed to fetch products')
             }
+
             const data = await response.json()
             console.log('Fetched products:', data.product)
 
-            setProducts(data.products || [])
-            console.log( 'Data : ' ,data);
-
             if (data.products && data.products.length > 0) {
-                setProducts(data.products)
+                const uniqueProductsMap = new Map();
+                data.products.forEach(product => {
+                    uniqueProductsMap.set(product.code, product);
+                })
+
+                const uniqueProducts = Array.from(uniqueProductsMap.values())
+
+                setProducts(prev => {
+                    const existingCodes = new Set(prev.map(p => p.code));
+                    const newProducts = uniqueProducts.filter(p => !existingCodes.has(p.code));
+                    return [...prev, ...newProducts];
+                });
+
                 setHasMoreProducts(data.products.length === 20)
+
             } else {
                 setHasMoreProducts(false);
             }
@@ -44,17 +59,18 @@ const ProductList = ({selectedCategory}) =>{
         }finally {
             setLoading(false)
         }
-    }, [searchQuery])
+    }, [searchQuery, category, page])
+
+    useEffect(() => {
+        setProducts([]); // Clear products when the search or category changes
+        setPage(1); // Reset page number
+        fetchProducts(); // Fetch products on search or category change
+    }, [searchQuery, selectedCategory]);
 
     useEffect(() => {
         fetchProducts();
-    }, [fetchProducts]);
+    }, [page]); // Fetch products when the page changes
 
-    useEffect(() => {
-        if (searchQuery) {
-            fetchProducts();
-        }
-    }, [fetchProducts, searchQuery]);
 
     useEffect(() => {
         if (selectedCategory) {
@@ -71,30 +87,34 @@ const ProductList = ({selectedCategory}) =>{
             });
         }
       }, [selectedCategory]);
-    
-    useEffect(() =>{
-        const handleScroll = () =>{
-            if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !loading ){
-                loadMore()
-            }
-        }
-        window.addEventListener('scroll', handleScroll)
 
-        return() => {
-            window.removeEventListener('scroll', handleScroll)
-        }
-    }, [loading])
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !loading) {
+                loadMore();
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [loading, hasMoreProducts]);
 
     const loadMore = () => {
-        setPage((prev)=> prev + 1)
-    }
+        if (hasMoreProducts) {
+            setPage((prev) => prev + 1);
+        }
+    };
+
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+    };
 
     return (
         <div>
-        
-
+            <CategoryFilter onCategorySelect={handleCategorySelect} /> 
             {error && <p className="text-red-500">Error: {error}</p>}
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.length === 0 && !loading && !error && (
                     <p className="text-center">No products found</p>
@@ -105,24 +125,9 @@ const ProductList = ({selectedCategory}) =>{
                 ))}
             </div>
 
-            {products.length > 0 ? (
-                <ul>
-                {products.map(product => (
-                    <li key={product.id}>
-                    <h4>{product.product_name}</h4>
-                    <img src={product.image_url} alt={product.product_name} style={{ width: '100px' }} />
-                    <p>Brand: {product.brands}</p>
-                    <p>Category: {selectedCategory}</p>
-                    </li>
-                ))}
-                </ul>
-            ) : (
-                <p>No products found for this category.</p>
-            )}
-
             {loading && <p className="text-center">Loading...</p>}
 
-            {!loading && !error && (
+            {!loading && !error && hasMoreProducts &&(
                 <button onClick={loadMore} className="mt-4 p-2 bg-blue-500 text-white rounded">
                     {loading ? 'Loading...' : 'Load more'}
                 </button>

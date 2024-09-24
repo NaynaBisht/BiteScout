@@ -6,13 +6,17 @@ const CategoryFilter = ({ onCategorySelect }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+
   useEffect(() => {
     // Fetch categories from OpenFoodFacts API
     const fetchCategories = async () => {
       try {
         const response = await axios.get('https://world.openfoodfacts.org/categories.json');
         const fetchedCategories = response.data.tags.map(tag => tag.name);
-        setCategories(fetchedCategories);
+
+        const uniqueCategories = [...new Set(fetchedCategories)];
+        setCategories(uniqueCategories);
+
       } catch (error) {
         setError('Error fetching categories.');
         console.error('Error fetching categories:', error);
@@ -20,10 +24,10 @@ const CategoryFilter = ({ onCategorySelect }) => {
         setLoading(false);
       }
     };
-
     fetchCategories();
   }, []);
 
+  
   return (
     <div>
       <label htmlFor="category" className="mr-2 text-gray-700 font-bold" >Filter by Category:</label>
