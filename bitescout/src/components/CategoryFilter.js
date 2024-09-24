@@ -29,8 +29,8 @@ const CategoryFilter = ({ onCategorySelect }) => {
 
   
   return (
-    <div>
-      <label htmlFor="category" className="mr-2 text-gray-700 font-bold" >Filter by Category:</label>
+    <div className="mx-auto bg-gray-100 w-[45%] p-2 pl-4 rounded border mb-4" >
+      <label htmlFor="category" className="mr-2 text-lg text-gray-700 font-bold " >Filter by Category :</label>
       {loading ? (
         <p>Loading categories...</p>
       ) : error ? (
@@ -40,7 +40,7 @@ const CategoryFilter = ({ onCategorySelect }) => {
           id="category"
           onChange={(e) => onCategorySelect(e.target.value)}
         >
-          <option value="">Select a Category</option>
+          <option value="" >Select a Category</option>
           {categories.map((category) => (
             <option key={category} value={category}>
               {category}

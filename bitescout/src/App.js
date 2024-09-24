@@ -4,14 +4,12 @@ import Header from './components/Header';
 import InfoSection from './components/InfoSection';
 import ProductDetails from "./components/ProductDetails";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import SearchBar from "./components/SearchBar";
 import './index.css';
 
 function App() {
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearch = () => {
-    console.log("Searching for: ", searchQuery);
-  };
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <Router>
@@ -20,9 +18,20 @@ function App() {
         <InfoSection />
         <h1 className="text-3xl font-bold text-center mb-4">Food Products</h1>
 
+        <SearchBar 
+          searchQuery={searchQuery} 
+          onSearchChange={setSearchQuery} 
+        />
+        
         <Routes>
-          <Route path="/" element={<ProductList category="someCategory" searchQuery={searchQuery} />} />
-          <Route path="/product/:barcode" element={<ProductDetails />} />
+          <Route path="/" 
+                 element={<ProductList searchQuery={searchQuery} />} />
+
+          <Route path="/product/:barcode" 
+                 element={<ProductDetails />} 
+          
+          />
+
         </Routes>
       </div>
     </Router>

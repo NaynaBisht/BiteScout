@@ -19,14 +19,6 @@ const ProductList = ({ category, searchQuery }) =>{
 
         try{
             const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms={name}&json=true `);
-            // const response = await fetch()
-            // let apiUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&json=true`;
-            // if (category) {
-            //     apiUrl += `&category=${category}`;
-            // }
-
-            // const response = await fetch(apiUrl);
-
 
             if(!response.ok){
                 throw new Error('Failed to fetch products')
