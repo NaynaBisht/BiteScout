@@ -22,14 +22,21 @@ const ProductList = ({ category, searchQuery }) =>{
         setError(null)
 
         try{
-            const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms={name}&json=true `);
+            // const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms={name}&json=true `);
+
+            const url = searchQuery
+            ? `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&json=true`
+            : `https://world.openfoodfacts.org/cgi/search.pl?search_terms=&json=true`; // Load default products if no search term
+
+            const response = await fetch(url);
+
 
             if(!response.ok){
                 throw new Error('Failed to fetch products')
             }
 
             const data = await response.json()
-            console.log('Fetched products:', data.product)
+            console.log('Fetched products:', data.products)
 
             if (data.products && data.products.length > 0) {
                 const uniqueProductsMap = new Map();
@@ -125,11 +132,23 @@ const ProductList = ({ category, searchQuery }) =>{
         }
         return sortedProducts;
     };
+
+    // Function to filter products based on the search query (Name or Barcode)
+    const filterProducts = (products) => {
+        return products.filter(product => {
+            const nameMatch = product.product_name?.toLowerCase().includes(searchQuery.toLowerCase());
+            const barcodeMatch = product.code?.includes(searchQuery); // Searching by barcode
+            return nameMatch || barcodeMatch;
+        });
+    };
+
+
     // Update products when sorting changes
     useEffect(() => {
         const sortedProducts = sortProducts(products);
         setProducts(sortedProducts);
     }, [sortBy, sortOrder]);
+
     // Handle sort criteria change
     const handleSortChange = (event) => {
         const { name, value } = event.target;
@@ -140,15 +159,16 @@ const ProductList = ({ category, searchQuery }) =>{
         }
     };
 
-    // Sorted products
+    // Sorted and filtered products
     const sortedProducts = sortProducts([...products]);
+    const filteredProducts = filterProducts(sortedProducts);
 
     return (
         <div>
             
-
             {/* Sorting Options */}
             <div className="flex flex-col sm:flex-row mb-4 justify-between items-center bg-cyan-100 border shadow-xl rounded-lg p-2">
+
                 <CategoryFilter onCategorySelect={handleCategorySelect} />
 
                 <div className="flex gap-4 items-center rounded border bg-orange-200 p-2 w-full sm:w-auto">
@@ -169,14 +189,24 @@ const ProductList = ({ category, searchQuery }) =>{
             </div>
 
 
-
             {error && <p className="text-red-500">Error: {error}</p>}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
                 {products.length === 0 && !loading && !error && (
                     <p className="text-center">No products found</p>
                 )}
 
                 {products.map((product) => (
+                    <ProductCard key={product.code} product={product} />
+                ))}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredProducts.length === 0 && !loading && !error && (
+                    <p className="text-center">No products found</p>
+                )}
+
+                {filteredProducts.map((product) => (
                     <ProductCard key={product.code} product={product} />
                 ))}
             </div>
